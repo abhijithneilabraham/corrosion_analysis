@@ -18,6 +18,7 @@ from keras.layers import LSTM
 from matplotlib import pyplot
 from math import sqrt
 from numpy import random
+from sklearn.preprocessing import LabelEncoder
 random.seed(7)
 
 def series_to_supervised(data, n_in=1, n_out=1, dropnan=True):
@@ -65,14 +66,17 @@ scaler = MinMaxScaler(feature_range=(0, 1))
 scaled = scaler.fit_transform(values)
 x=scaled[:,:2]
 y=scaled[:,2]
+encoder = LabelEncoder()
+train_y=encoder.fit_transform(y)
 model = Sequential()
 model.add(Dense(12, input_dim=2, activation='relu'))
 model.add(Dense(8, activation='relu'))
-model.add(Dense(1, activation='softmax'))
+model.add(Dense(8, activation='softmax'))
+# compile the keras model
 model.compile(loss='sparse_categorical_crossentropy', optimizer='adam', metrics=['accuracy'])
-model.fit(x, y, epochs=150, batch_size=10)
-_, accuracy = model.evaluate(X, y)
+# fit the keras model on the dataset
+model.fit(x, train_y, epochs=150, batch_size=10)
+_, accuracy = model.evaluate(x, train_y)
 print('Accuracy: %.2f' % (accuracy*100))
-
 
 

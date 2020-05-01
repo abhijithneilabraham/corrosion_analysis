@@ -17,7 +17,8 @@ from keras.layers import Dense
 from keras.layers import LSTM
 from matplotlib import pyplot
 from math import sqrt
-from numpy import random
+from numpy import random,concatenate,asarray
+
 from sklearn.preprocessing import LabelEncoder
 random.seed(7)
 
@@ -68,15 +69,33 @@ x=scaled[:,:2]
 y=scaled[:,2]
 encoder = LabelEncoder()
 train_y=encoder.fit_transform(y)
-model = Sequential()
-model.add(Dense(12, input_dim=2, activation='relu'))
-model.add(Dense(8, activation='relu'))
-model.add(Dense(8, activation='softmax'))
-# compile the keras model
-model.compile(loss='sparse_categorical_crossentropy', optimizer='adam', metrics=['accuracy'])
-# fit the keras model on the dataset
-model.fit(x, train_y, epochs=150, batch_size=10)
-_, accuracy = model.evaluate(x, train_y)
+train_x,test_x,train_y,test_y=train_test_split(x,train_y,test_size=0.3)
+# model = Sequential()
+# model.add(Dense(12, input_dim=2, activation='relu'))
+# model.add(Dense(8, activation='relu'))
+# model.add(Dense(8, activation='softmax'))
+# # compile the keras model
+# model.compile(loss='sparse_categorical_crossentropy', optimizer='adam', metrics=['accuracy'])
+# # fit the keras model on the dataset
+# model.fit(train_x, train_y, epochs=150, batch_size=20)
+# model.save("final.h5")
+from keras.models import load_model
+model=load_model("final.h5")
+_, accuracy = model.evaluate(test_x, test_y)
 print('Accuracy: %.2f' % (accuracy*100))
+yhat=model.predict_classes(test_x)
+
+inv_yhat = encoder.inverse_transform(yhat)
+inv_yhat = concatenate(( inv_yhat[:,None],test_x),axis=1)
+inv_yhat2=scaler.inverse_transform(inv_yhat)
+print(values[-10:,2],inv_yhat2[-10:,2])
+pyplot.figure(1)
+pyplot.plot(values[-50:,2], label='actual')
+pyplot.plot(inv_yhat2[-50:,2], label='predicted')
+pyplot.legend()
+
+pyplot.show()
+# for i in range(len(yhat)):
+#     print("actual==",inv_yhat[i],"  predicted",inv_test_y[i])
 
 

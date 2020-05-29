@@ -65,36 +65,36 @@ values = values.astype('float32')
 # normalize features
 scaler = MinMaxScaler(feature_range=(0, 1))
 scaled = scaler.fit_transform(values)
-x=scaled[:,:2]
-y=scaled[:,2]
-encoder = LabelEncoder()
-train_y=encoder.fit_transform(y)
-train_x,test_x,train_y,test_y=train_test_split(x,train_y,test_size=0.3)
-# model = Sequential()
-# model.add(Dense(12, input_dim=2, activation='relu'))
-# model.add(Dense(8, activation='relu'))
-# model.add(Dense(8, activation='softmax'))
-# # compile the keras model
-# model.compile(loss='sparse_categorical_crossentropy', optimizer='adam', metrics=['accuracy'])
-# # fit the keras model on the dataset
-# model.fit(train_x, train_y, epochs=150, batch_size=20)
-# model.save("final.h5")
+x=values[:,:2]
+y=values[:,2]
+
+train_x,test_x,train_y,test_y=train_test_split(x,y,test_size=0.3)
+train_x = train_x.reshape((train_x.shape[0], 1, train_x.shape[1]))
+test_x = test_x.reshape((test_x.shape[0], 1, test_x.shape[1]))
+model = Sequential()
+model.add(LSTM(50, input_shape=(train_x.shape[1], train_x.shape[2])))
+model.add(Dense(1))
+model.compile(loss='mse', optimizer='adam')
+# compile the keras model
+
+# fit the keras model on the dataset
+model.fit(train_x, train_y, epochs=150, batch_size=20)
+model.save("final.h5")
 from keras.models import load_model
 model=load_model("final.h5")
-_, accuracy = model.evaluate(test_x, test_y)
-print('Accuracy: %.2f' % (accuracy*100))
+
 yhat=model.predict_classes(test_x)
 
-inv_yhat = encoder.inverse_transform(yhat)
-inv_yhat = concatenate(( inv_yhat[:,None],test_x),axis=1)
-inv_yhat2=scaler.inverse_transform(inv_yhat)
-print(values[-10:,2],inv_yhat2[-10:,2])
-pyplot.figure(1)
-pyplot.plot(values[-50:,2], label='actual')
-pyplot.plot(inv_yhat2[-50:,2], label='predicted')
-pyplot.legend()
+# inv_yhat = encoder.inverse_transform(yhat)
+# inv_yhat = concatenate(( inv_yhat[:,None],test_x),axis=1)
+# inv_yhat2=scaler.inverse_transform(inv_yhat)
+# print(values[-10:,2],inv_yhat2[-10:,2])
+# pyplot.figure(1)
+# pyplot.plot(values[-50:,2], label='actual')
+# pyplot.plot(inv_yhat2[-50:,2], label='predicted')
+# pyplot.legend()
 
-pyplot.show()
+# pyplot.show()
 # for i in range(len(yhat)):
 #     print("actual==",inv_yhat[i],"  predicted",inv_test_y[i])
 

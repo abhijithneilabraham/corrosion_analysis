@@ -42,13 +42,14 @@ test_x = test_x.reshape((test_x.shape[0], 1, test_x.shape[1]))
 
 model = Sequential()
 model.add(LSTM(50, input_shape=(train_x.shape[1], train_x.shape[2])))
+model.add(Dense(20))
 model.add(Dense(1))
-model.compile(loss='mse', optimizer='adam')
+model.compile(loss='mae', optimizer='adam')
 # compile the keras model
 
 # fit the keras model on the dataset
 print(train_x[0])
-model.fit(train_x, train_y, epochs=150, batch_size=10)
+model.fit(train_x, train_y, epochs=150, batch_size=10,validation_data=(test_x,test_y))
 model.save("final.h5")
 from keras.models import load_model
 model=load_model("final.h5")

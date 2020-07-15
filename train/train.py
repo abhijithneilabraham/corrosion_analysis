@@ -12,9 +12,9 @@ from pandas import concat
 from sklearn.preprocessing import MinMaxScaler
 from sklearn.metrics import mean_squared_error
 from sklearn.model_selection import train_test_split
-from keras.models import Sequential
-from keras.layers import Dense
-from keras.layers import LSTM
+from tensorflow.keras.models import Sequential
+from tensorflow.keras.layers import Dense
+from tensorflow.keras.layers import LSTM
 from matplotlib import pyplot
 from math import sqrt
 from numpy import random,concatenate,asarray
@@ -41,10 +41,10 @@ train_x = train_x.reshape((train_x.shape[0], 1, train_x.shape[1]))
 test_x = test_x.reshape((test_x.shape[0], 1, test_x.shape[1]))
 
 model = Sequential()
-model.add(LSTM(50, input_shape=(train_x.shape[1], train_x.shape[2])))
-model.add(Dense(20))
+model.add(Dense(100,activation='relu', input_shape=(train_x.shape[1], train_x.shape[2])))
+model.add(Dense(50,activation='relu'))
 model.add(Dense(1))
-model.compile(loss='mae', optimizer='adam')
+model.compile(loss='mse', optimizer='adam')
 # compile the keras model
 
 # fit the keras model on the dataset
@@ -52,15 +52,14 @@ print(train_x[0])
 model.fit(train_x, train_y, epochs=150, batch_size=10,validation_data=(test_x,test_y))
 model.save("final.h5")
 from keras.models import load_model
-model=load_model("final.h5")
-
 yhat=model.predict(test_x)
+yhat=yhat.reshape(yhat.shape[0],yhat.shape[2])
 test_x = test_x.reshape((test_x.shape[0], test_x.shape[2]))
 prediction = concatenate((test_x,yhat), axis=1)
 prediction2 = scaler.inverse_transform(prediction)
 pred = prediction2[:,-1]
 test_y = test_y.reshape((len(test_y), 1))
-actual_y = concatenate((test_y, test_x), axis=1)
+actual_y = concatenate((test_x, test_y), axis=1)
 actual_y2 = scaler.inverse_transform(actual_y)
 act = actual_y2[:,-1]
 import math
